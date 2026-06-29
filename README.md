@@ -1,96 +1,130 @@
 # Mentorly
 
-Mentorly is a Flutter-based mobile application project structured as a modern cross-platform app foundation with UI theming, shared constants, and video-conferencing-oriented integrations. The repository is currently in an early scaffold state, but the organization is designed so a new developer can quickly understand where core app concerns live and how the main files relate to each other.
+Mentorly is a Flutter mobile application scaffold built for cross-platform Android and iOS. The current implementation is an early-stage foundation with a simple app shell, shared theme definitions, and a configuration entry point for future integrations, including video conferencing.
 
 ## Tech Stack
 
-- Flutter SDK: Dart/Flutter application framework
-- Language: Dart
-- UI: Material Design with Flutter widgets
-- Styling: custom theme tokens and Google Fonts support
-- Internationalization: `intl` package
-- Video/conference support: `zego_uikit_prebuilt_video_conference`
-- Development tooling: `flutter_test` and `flutter_lints`
+- Flutter SDK (Dart) for cross-platform UI and app logic
+- Material Design widgets for core interface
+- `zego_uikit_prebuilt_video_conference` for prebuilt video conferencing capabilities
+- `google_fonts` for font loading and typography
+- `intl` for internationalization support
+- `flutter_test` for Flutter widget testing
+- `flutter_lints` for linting and coding standards
 
 ## Architecture Overview
 
-The application follows a simple layered structure suited for a growing Flutter app:
+The app uses a lightweight, layered architecture that separates core concerns into:
 
-1. App entry layer
-   - The app starts from `lib/main.dart`.
-   - `main()` initializes the app by calling `runApp()`.
-   - `MyApp` serves as the root widget and defines the global app shell.
+- App entry and routing: `lib/main.dart`
+- Theme and design tokens: `lib/theme/app_theme.dart`
+- Shared configuration and constants: `lib/utils/constants.dart`
+- Native platform wrappers: `android/` and `ios/`
 
-2. Presentation layer
-   - The current UI is centered around the home screen defined in `lib/main.dart`.
-   - The UI is built using Flutter widgets and Material components.
+This structure is intended to remain simple while allowing new screens, widgets, models, and services to be added without breaking the root app flow.
 
-3. Theme and design system layer
-   - `lib/theme/app_theme.dart` contains shared color constants and theme-related values.
-   - This is the central place for app-wide design tokens such as primary, secondary, background, and text colors.
+### Current App Flow
 
-4. Shared configuration layer
-   - `lib/utils/constants.dart` holds reusable configuration values.
-   - In the current version, it includes the Zego configuration placeholders used by the video conferencing integration.
-
-5. Platform layer
-   - Android and iOS platform-specific setup lives in the `android/` and `ios/` folders.
-   - These folders are generated and maintained by Flutter for native build support.
+1. `main()` in `lib/main.dart` launches the app with `runApp()`.
+2. `MyApp` creates the `MaterialApp`, sets the app title, theme, and home screen.
+3. `MyHomePage` renders the current UI and handles local state for the counter example.
+4. Theme values are centralized in `lib/theme/app_theme.dart` to keep color constants in one place.
+5. Configuration values for external services, such as Zego, are stored in `lib/utils/constants.dart`.
 
 ## Project Structure
 
 ```text
 mentorly/
-├── android/                  # Native Android project files
-├── ios/                      # Native iOS project files
-├── lib/
-│   ├── main.dart             # App entry point and root widgets
-│   ├── theme/
-│   │   └── app_theme.dart    # Shared theme values and colors
-│   └── utils/
-│       └── constants.dart    # Shared config and service constants
-├── test/                     # Widget and app-level tests
-├── pubspec.yaml              # Flutter package metadata and dependencies
-└── README.md                 # Project documentation
+├── android/                        # Native Android project files and Gradle config
+├── ios/                            # Native iOS workspace and platform settings
+├── lib/                            # Dart source code
+│   ├── main.dart                   # App entry point and root widget tree
+│   ├── theme/                      # Theme and design token definitions
+│   │   └── app_theme.dart          # Shared color palettes and subject color map
+│   └── utils/                      # Shared utilities and constant values
+│       └── constants.dart          # External service credentials/config placeholders
+├── test/                           # Flutter widget test files
+│   └── widget_test.dart            # Default test scaffold
+├── pubspec.yaml                    # Flutter package metadata and dependency declarations
+├── analysis_options.yaml           # Static analysis rules and lint configuration
+└── README.md                       # Developer-facing project documentation
 ```
 
-## File Responsibilities
+## Core Files and Responsibilities
 
-- `lib/main.dart`
-  - Entry point of the application.
-  - Creates the root `MaterialApp`.
-  - Defines the current home page widget and basic app behavior.
+### `lib/main.dart`
 
-- `lib/theme/app_theme.dart`
-  - Holds app-wide design constants.
-  - Keeps colors and theme values centralized so UI changes remain consistent.
+- App entry point and root widget setup.
+- Defines `MyApp` as the `MaterialApp` containing theme and home screen.
+- Contains `MyHomePage`, a stateful widget showing the default counter UI.
+- Uses Flutter's built-in `ThemeData` for basic theming.
 
-- `lib/utils/constants.dart`
-  - Stores reusable constants and service configuration values.
-  - Intended to be extended as the app grows and more modules need shared configuration.
+### `lib/theme/app_theme.dart`
 
-- `pubspec.yaml`
-  - Declares package dependencies and Flutter configuration.
-  - Tracks key libraries such as video conferencing, Google Fonts, and internationalization support.
+- Centralizes app color constants.
+- Provides a palette for primary, secondary, background, text, and accent colors.
+- Includes a subject-specific color map for domain-driven styling.
+- This file should be referenced anywhere consistent app branding or subject colors are needed.
 
-- `test/widget_test.dart`
-  - Contains the default widget test scaffold for future regression testing.
+### `lib/utils/constants.dart`
 
-## How the Main Files Connect
+- Holds reusable constant values for app configuration.
+- Currently defines `ZegoConfig` placeholders for `appID` and `appSign`.
+- Serves as a future home for API keys, endpoint URLs, feature flags, and other app-wide constants.
 
-- `main.dart` is the orchestration point for the app shell.
-- `app_theme.dart` provides style values that should be referenced by screens added later.
-- `constants.dart` is meant to be consumed by services or feature modules that require shared configuration.
-- `pubspec.yaml` supplies the dependencies that these modules rely on, including the video-conferencing SDK and styling packages.
+### `pubspec.yaml`
 
-## Extension Points for Future Development
+- Declares Flutter and Dart SDK environment constraints.
+- Lists external dependencies required by the app.
+- Includes `zego_uikit_prebuilt_video_conference`, `google_fonts`, and `intl`.
+- Enables Material icons with `uses-material-design: true`.
 
-As the app evolves, the project can grow naturally by adding feature-specific folders such as:
+### `test/widget_test.dart`
 
-- `lib/screens/` for page-level UI
-- `lib/widgets/` for reusable UI components
-- `lib/models/` for data models
-- `lib/services/` for API and platform integrations
-- `lib/providers/` or `lib/controllers/` for state management
+- Default Flutter-generated widget test file.
+- Useful starting point for adding widget-level regression tests as features are built.
 
-This structure keeps the current scaffold simple while leaving room for a larger app architecture as features are introduced.
+## Native Platform Modules
+
+### `android/`
+
+- Contains Android-specific Gradle configuration and manifest files.
+- Generated by Flutter and required for Android app building.
+- Key locations:
+  - `android/app/src/main/AndroidManifest.xml`
+  - `android/app/build.gradle.kts`
+  - `android/gradle.properties`
+
+### `ios/`
+
+- Contains Xcode workspace files, build settings, and iOS native launch resources.
+- Generated by Flutter and required for iOS app building.
+- Key locations:
+  - `ios/Runner/Info.plist`
+  - `ios/Runner.xcodeproj`
+  - `ios/Runner.xcworkspace`
+
+## How the Pieces Connect
+
+- `main.dart` is the central starting point that wires together theme, home page, and app metadata.
+- `app_theme.dart` is the design token source for colors and styling that should be reused across UI screens.
+- `constants.dart` is the shared config layer for values that span features or services.
+- `pubspec.yaml` supplies both the Flutter framework and the packages used by the source files.
+- Native folders (`android/`, `ios/`) bridge Flutter code to platform-specific build targets.
+
+## When Extending the App
+
+For the next developer, this scaffold is optimized for gradual growth. Recommended extension points:
+
+- Add `lib/screens/` for page-level UI and navigation targets.
+- Add `lib/widgets/` for reusable visual components.
+- Add `lib/models/` for data structures and JSON mapping.
+- Add `lib/services/` for network, authentication, and third-party integrations.
+- Add `lib/providers/` or `lib/controllers/` for application state management.
+- Add `lib/routes.dart` or a dedicated navigation module for more complex route handling.
+
+## Notes for Developers
+
+- There are no current feature screens beyond the default counter app. Use existing theme and config files for any new UI and integration work.
+- `ZegoConfig` is currently a placeholder and must be populated with valid credentials before enabling video conferencing.
+- Keep theme values centralized in `lib/theme/app_theme.dart` to ensure consistent app styling.
