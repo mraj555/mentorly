@@ -1,197 +1,194 @@
 # Mentorly
 
-Mentorly is a Flutter mobile app for browsing and joining online learning classes. This repository is a UI-first prototype with mock class data, a tabbed home screen, class detail pages, and a Zego-powered video conference placeholder. The app is organized so a new developer can quickly understand the flow and extend it with real APIs, authentication, and live sessions.
+Mentorly is a Flutter-based mobile app for discovering and joining online learning sessions. The current implementation is a UI-first prototype that uses mock class data, a tabbed home experience, detail pages, and a placeholder video-conference flow powered by Zego.
 
-## Overview
+## Product overview
 
-The app currently provides:
+The app is organized around a simple learning experience:
 
 - A home screen with three tabs: Live, Upcoming, and Completed
-- Card-based class listings for each category
-- A detail screen for every class
-- Live status detection using scheduled time and duration
-- A Join button that opens the video conference screen
-- State management using Provider and ChangeNotifier
-- Centralized theme and constants for consistent UI
+- Class cards that summarize title, instructor, timing, subject, and participant count
+- A detail page for each course/session
+- Live-status logic based on the session schedule and duration
+- A join action that navigates into the video call screen
+- State management through Provider and ChangeNotifier
+- Shared theme and constant values for consistent UI behavior
 
-## Tech Stack
+## Tech stack
+
+### Core
 
 - Flutter + Dart
-  - Flutter framework for cross-platform mobile UI
-  - Dart SDK constraint: `^3.12.1`
-- State management
-  - `provider` with `ChangeNotifier`
-- Styling and fonts
-  - `google_fonts`
-  - `cupertino_icons`
-- Formatting
-  - `intl` for date and time display
-- Real-time / video integration
-  - `zego_uikit_prebuilt_video_conference`
-  - `zego_express_engine`
-- Quality tooling
-  - `flutter_test` for widget and unit tests
-  - `flutter_lints` for static analysis
+  - Cross-platform UI framework for mobile applications
+  - Current SDK constraint: ^3.12.1
+
+### State and architecture
+
+- Provider
+  - Used for app-wide state exposure and change notifications
+  - Keeps the UI reactive without introducing a heavier state stack
+
+### UI and styling
+
+- Material 3
+  - The app uses Flutter Material design components and theming
+- Google Fonts
+  - Typography is configured through Google Fonts for a more polished visual system
+- Cupertino Icons
+  - Shared icon set used throughout the screens
+
+### Data and formatting
+
+- Intl
+  - Used for formatting dates and times on the class cards and detail screen
+
+### Real-time / video experience
+
+- Zego UIKit Prebuilt Video Conference
+  - Provides the video-conference UI shell for joining a class
+- Zego Express Engine
+  - Powers the underlying real-time communication layer
+
+### Quality and validation
+
+- flutter_test
+  - Supports widget and unit testing
+- flutter_lints
+  - Enforces consistent Dart analyzer and lint rules
 
 ## Architecture
 
-Mentorly uses a lightweight layered architecture with clear separation of responsibilities.
+Mentorly follows a lightweight layered architecture with a clear separation between UI, state, domain models, and shared support code.
 
-### Presentation Layer
+### 1. Presentation layer
 
-Located in `lib/screens` and `lib/widgets`.
+This layer is responsible for rendering what the user sees.
 
-- `lib/screens/home_screen.dart`
-  - Main tabbed interface
-  - Renders Live, Upcoming, and Completed class views
-  - Uses `RefreshIndicator` for pull-to-refresh behavior
-- `lib/screens/class_details_screen.dart`
-  - Shows class metadata, description, and live status
-  - Provides navigation to the video call screen
-- `lib/screens/video_call_screen.dart`
-  - Wraps a Zego prebuilt video conference widget
-  - Uses a conference ID derived from the selected class
-- `lib/widgets/class_card.dart`
-  - Displays summary data for each class
-  - Navigates to details on tap
-- `lib/widgets/class_listview.dart`
-  - Renders a list of class cards or an empty state
+- [lib/screens/home_screen.dart](lib/screens/home_screen.dart)
+  - Builds the main tabbed experience
+  - Watches the provider and passes the appropriate class lists to the list widget
+  - Wraps the content in a refreshable view
+- [lib/screens/class_details_screen.dart](lib/screens/class_details_screen.dart)
+  - Displays detailed session information for the selected class
+  - Determines whether the class is live and controls the join-state UI
+- [lib/screens/video_call_screen.dart](lib/screens/video_call_screen.dart)
+  - Opens the video-conference experience for the selected class
+  - Uses the class ID to define the conferencing room context
+- [lib/widgets/class_card.dart](lib/widgets/class_card.dart)
+  - Renders the session summary card
+  - Handles navigation to the details screen on tap
+- [lib/widgets/class_listview.dart](lib/widgets/class_listview.dart)
+  - Renders a list of session cards or an empty-state message depending on data availability
 
-### State Layer
+### 2. State layer
 
-Located in `lib/providers`.
+This layer owns app data and user-driven state transitions.
 
-- `lib/providers/class_provider.dart`
-  - Owns the list of `OnlineClass` objects
+- [lib/providers/class_provider.dart](lib/providers/class_provider.dart)
+  - Holds the in-memory list of sessions
   - Seeds mock data on initialization
-  - Exposes category getters:
-    - `liveClasses`
-    - `upComingClasses`
-    - `completedClasses`
-  - Handles refresh behavior and state updates
+  - Exposes filtered lists for live, upcoming, and completed classes
+  - Provides refresh behavior and participant join handling
 
-### Domain Layer
+### 3. Domain layer
 
-Located in `lib/models`.
+This layer contains the core business model for a class/session.
 
-- `lib/models/online_class.dart`
-  - Defines the `OnlineClass` model and `ClassStatus` enum
-  - Contains helpers for `isLive`, `isUpcoming`, and `isCompleted`
-  - Supports `copyWith` for immutable updates
+- [lib/models/online_class.dart](lib/models/online_class.dart)
+  - Defines the OnlineClass model
+  - Stores metadata such as title, instructor, subject, schedule, duration, participants, and description
+  - Includes computed helpers for determining whether a class is live, upcoming, or completed
+  - Provides copyWith for value updates in a controlled way
 
-### Shared / Support Layer
+### 4. Shared / support layer
 
-Located in `lib/theme` and `lib/utils`.
+These files hold cross-cutting configuration and visual constants.
 
-- `lib/theme/app_theme.dart`
-  - Centralizes theme color values and subject accent mappings
-- `lib/utils/constants.dart`
-  - Stores shared constants and Zego configuration placeholders
+- [lib/theme/app_theme.dart](lib/theme/app_theme.dart)
+  - Centralizes app colors and subject-specific accent values
+- [lib/utils/constants.dart](lib/utils/constants.dart)
+  - Stores the Zego configuration placeholders used by the video-call screen
 
-### Platform Layer
+### 5. App bootstrap
 
-- `android/` contains Android native project configuration
-- `ios/` contains iOS native project configuration
+The root application entry point wires the app together.
 
-## Runtime Flow
+- [lib/main.dart](lib/main.dart)
+  - Registers the ClassProvider at the root
+  - Configures the app theme and typography
+  - Launches the home screen as the app entry
 
-1. `lib/main.dart` boots the application, configures theme, and registers `ClassProvider`.
-2. `HomeScreen` consumes the provider and displays tabbed content.
-3. `ClassProvider` filters the seeded mock classes into Live, Upcoming, and Completed groups.
-4. `ClassListview` renders the selected group of `OnlineClass` items.
-5. `ClassCard` navigates to `ClassDetailsScreen` when a card is tapped.
-6. `ClassDetailsScreen` allows users to join the class via `VideoCallScreen`.
+## Runtime flow
 
-## Project Structure
+1. [lib/main.dart](lib/main.dart) boots the application and creates the root provider.
+2. [lib/screens/home_screen.dart](lib/screens/home_screen.dart) reads provider state and renders the three tabs.
+3. [lib/providers/class_provider.dart](lib/providers/class_provider.dart) filters the mock session list into live, upcoming, and completed groups.
+4. [lib/widgets/class_listview.dart](lib/widgets/class_listview.dart) renders the selected session list.
+5. [lib/widgets/class_card.dart](lib/widgets/class_card.dart) navigates to the detail page when a card is selected.
+6. [lib/screens/class_details_screen.dart](lib/screens/class_details_screen.dart) shows the session details and initiates the join action.
+7. [lib/screens/video_call_screen.dart](lib/screens/video_call_screen.dart) opens the Zego-based conference experience.
+
+## Project structure
 
 ```text
 mentorly/
-├── android/                        # Android native project files and Gradle config
-├── ios/                            # iOS native project files and Xcode config
-├── lib/                            # Flutter app source files
-│   ├── main.dart                   # App bootstrap, provider setup, theme, and home screen entry
+├── android/                  # Native Android project files
+├── ios/                      # Native iOS project files
+├── lib/
+│   ├── main.dart             # App bootstrap and provider/theme setup
 │   ├── models/
-│   │   └── online_class.dart       # Core class model and status helper methods
+│   │   └── online_class.dart # Core session model and status helpers
 │   ├── providers/
-│   │   └── class_provider.dart     # App state and class category logic
+│   │   └── class_provider.dart # Mock data source, filtering, and refresh logic
 │   ├── screens/
-│   │   ├── home_screen.dart        # Main tabbed home page
-│   │   ├── class_details_screen.dart # Class details page and join-class flow
-│   │   └── video_call_screen.dart  # Zego video conference screen
-│   ├── widgets/
-│   │   ├── class_card.dart         # Class card UI and navigation
-│   │   └── class_listview.dart     # Category list container and empty states
+│   │   ├── home_screen.dart
+│   │   ├── class_details_screen.dart
+│   │   └── video_call_screen.dart
 │   ├── theme/
-│   │   └── app_theme.dart          # Shared theme color definitions
-│   └── utils/
-│       └── constants.dart          # Global constants and Zego config values
-├── test/                           # Widget and unit tests
-├── pubspec.yaml                    # Dependencies and Flutter SDK constraint
-└── analysis_options.yaml           # Lint rules and analyzer configuration
+│   │   └── app_theme.dart    # Shared color and theme constants
+│   ├── utils/
+│   │   └── constants.dart    # Shared configuration values
+│   └── widgets/
+│       ├── class_card.dart
+│       └── class_listview.dart
+├── test/                     # Automated tests
+├── pubspec.yaml              # App dependencies and Flutter SDK constraint
+└── analysis_options.yaml     # Linting and analyzer configuration
 ```
 
-## File Responsibilities
+## File connection map
 
-- `lib/main.dart`
-  - Registers the root provider
-  - Applies theme configuration
-  - Launches `HomeScreen`
+The easiest way to understand the project is to follow the data flow through these files:
 
-- `lib/providers/class_provider.dart`
-  - Seeds and manages the in-memory class collection
-  - Exposes filtered lists for each tab
-  - Contains refresh behavior
+- [lib/main.dart](lib/main.dart)
+  - Creates the app and injects [lib/providers/class_provider.dart](lib/providers/class_provider.dart)
+- [lib/providers/class_provider.dart](lib/providers/class_provider.dart)
+  - Owns the collection of [lib/models/online_class.dart](lib/models/online_class.dart) records
+  - Supplies filtered data to [lib/screens/home_screen.dart](lib/screens/home_screen.dart)
+- [lib/screens/home_screen.dart](lib/screens/home_screen.dart)
+  - Consumes provider state and renders [lib/widgets/class_listview.dart](lib/widgets/class_listview.dart)
+- [lib/widgets/class_card.dart](lib/widgets/class_card.dart)
+  - Displays one session and routes to [lib/screens/class_details_screen.dart](lib/screens/class_details_screen.dart)
+- [lib/screens/class_details_screen.dart](lib/screens/class_details_screen.dart)
+  - Uses the selected model instance and launches [lib/screens/video_call_screen.dart](lib/screens/video_call_screen.dart)
+- [lib/theme/app_theme.dart](lib/theme/app_theme.dart) and [lib/utils/constants.dart](lib/utils/constants.dart)
+  - Supply shared styling and configuration to the screens and widgets
 
-- `lib/screens/home_screen.dart`
-  - Builds the tabbed home screen
-  - Uses provider state to populate each category
-  - Wraps content in a refresh indicator
+## Extension points
 
-- `lib/widgets/class_listview.dart`
-  - Renders either a scrollable list or an empty state
-  - Selects the correct text for empty categories
+The app is intentionally structured so it can grow without a large rewrite:
 
-- `lib/widgets/class_card.dart`
-  - Displays the class summary card
-  - Shows subject, instructor, schedule, and participants
-  - Navigates to details when tapped
+- Replace mock data with a real API or service layer
+- Add repositories for remote persistence and caching
+- Introduce authentication and user profiles
+- Add a navigation/router layer for scalable screen management
+- Expand the live-session experience using the existing Zego integration
 
-- `lib/screens/class_details_screen.dart`
-  - Displays selected class details
-  - Shows if a class is live
-  - Navigates to the Zego video call screen
+## Recommended reading order for a new developer
 
-- `lib/screens/video_call_screen.dart`
-  - Creates the Zego video conference experience
-  - Uses the class ID as the conference room identifier
-
-- `lib/models/online_class.dart`
-  - Defines the class domain model and status evaluation
-  - Uses computed getters for live/upcoming/completed logic
-
-- `lib/theme/app_theme.dart`
-  - Stores shared color constants and subject-specific accents
-
-- `lib/utils/constants.dart`
-  - Stores Zego credentials placeholders and global constants
-
-## Extension Points for Future Development
-
-The current implementation is intentionally simple and built to grow:
-
-- Add a service layer for API calls and remote class data
-- Add a repository layer for data source abstraction
-- Replace seeded mock data with backend or local persistence
-- Add authentication and user profiles
-- Introduce a routing layer for scalable navigation
-- Expand live-class capabilities using the existing Zego integration
-
-## Notes for the Next Developer
-
-Best path to understand the codebase:
-
-1. Review `lib/models/online_class.dart` for class shape and status rules.
-2. Inspect `lib/providers/class_provider.dart` for state and category logic.
-3. Open `lib/screens/home_screen.dart` to see how the tabs and lists are composed.
-4. Read `lib/widgets/class_card.dart` and `lib/widgets/class_listview.dart` for reusable UI behavior.
-5. Review `lib/screens/video_call_screen.dart` and `lib/utils/constants.dart` for the live-class integration path.
+1. Start with [lib/main.dart](lib/main.dart) to understand bootstrapping and provider setup.
+2. Review [lib/models/online_class.dart](lib/models/online_class.dart) to understand the core domain model.
+3. Read [lib/providers/class_provider.dart](lib/providers/class_provider.dart) to see how mock data is prepared and filtered.
+4. Open [lib/screens/home_screen.dart](lib/screens/home_screen.dart) to understand the tab-based UI composition.
+5. Follow [lib/widgets/class_card.dart](lib/widgets/class_card.dart) and [lib/screens/class_details_screen.dart](lib/screens/class_details_screen.dart) to see how navigation works.
+6. Inspect [lib/screens/video_call_screen.dart](lib/screens/video_call_screen.dart) for the live-session integration path.

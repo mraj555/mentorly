@@ -19,7 +19,14 @@ class VideoCallScreen extends StatelessWidget {
         conferenceID: classID,
         userID: userID,
         userName: userName,
-        config: ZegoUIKitPrebuiltVideoConferenceConfig(),
+        config: ZegoUIKitPrebuiltVideoConferenceConfig(
+          turnOnCameraWhenJoining: true,
+          turnOnMicrophoneWhenJoining: true,
+          useSpeakerWhenJoining: true,
+          onLeave: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
     );
   }
