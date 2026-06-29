@@ -1,138 +1,135 @@
 # Mentorly
 
-Mentorly is a Flutter mobile app scaffold designed for Android and iOS. It currently provides a minimal app entry point, reusable theme and constant definitions, and a sample domain model/provider layer for online class scheduling.
+Mentorly is a Flutter-based mobile app scaffold for an online-learning and class-scheduling experience. The current codebase is intentionally lightweight, but it already separates the app into clear layers for UI, state, domain models, theme, and platform integration.
+
+This README is written for the next developer who needs to understand how the project is structured and how the main files connect to each other.
 
 ## Tech Stack
 
-- Flutter SDK with Dart for cross-platform mobile UI and logic
-- Flutter `material` library for Material Design widgets
-- `zego_uikit_prebuilt_video_conference` for planned video conferencing support
-- `google_fonts` for font loading and typography
-- `intl` for date/time formatting and localization-ready utilities
-- `cupertino_icons` for platform-style icons on iOS
-- `flutter_test` for Flutter widget testing and future test coverage
-- `flutter_lints` for lint rules and Dart static analysis
+- Flutter SDK with Dart for cross-platform mobile application development
+- Material 3 and Flutter widgets for the app UI
+- Provider for state management and reactive UI updates
+- Google Fonts for typography and theme polish
+- Intl for date and time formatting utilities
+- Cupertino Icons for iOS-style icons
+- Zego prebuilt video conference UI and Zego Express Engine for future live-class integration
+- Flutter test and Flutter lints for validation and code quality
 
 ## Architecture Overview
 
-Mentorly is structured as a lightweight layered scaffold to keep concerns separate and make feature expansion straightforward.
+The project follows a simple layered structure that keeps the app easy to extend:
 
-- `lib/main.dart` is the app entry point and root widget tree.
-- `lib/theme/` contains shared styling and design tokens.
-- `lib/utils/` stores app-level constants and integration placeholders.
-- `lib/models/` defines data models and business-domain objects.
-- `lib/providers/` provides state management and business logic.
-- `android/` and `ios/` contain native build targets and platform-specific configuration.
+- UI layer: screens and widgets render the experience
+- State layer: providers expose data and actions to the UI
+- Domain layer: models describe the business objects used by the app
+- Shared support layer: theme and constants provide reusable definitions
+- Platform layer: Android and iOS folders host native build configuration
 
-This layout is intentionally small, so developers can add screens, services, and routing without changing the root app shell.
+### Runtime Flow
+
+1. `lib/main.dart` boots the app and creates the root provider container.
+2. `HomeScreen` is mounted as the initial screen and listens to `ClassProvider`.
+3. `ClassProvider` seeds sample `OnlineClass` data and exposes filtered lists such as live, upcoming, and completed classes.
+4. `OnlineClass` holds the shape of each class and provides computed flags like `isLive`, `isUpcoming`, and `isCompleted`.
+5. Theme values and config placeholders are shared through `app_theme.dart` and `constants.dart`.
 
 ## Project Structure
 
 ```text
 mentorly/
-├── android/                        # Native Android project files and Gradle config
-├── ios/                            # Native iOS project files, Xcode workspace, and build settings
-├── lib/                            # Dart application source code
-│   ├── main.dart                   # App entry point and root MaterialApp
-│   ├── models/                     # Domain data models
-│   │   └── online_class.dart       # Online class model, status helpers, and copyWith
-│   ├── providers/                  # App state management providers
-│   │   └── class_provider.dart     # ChangeNotifier provider for class scheduling state
-│   ├── theme/                      # Shared theme and styling definitions
-│   │   └── app_theme.dart          # Color constants and subject color palette
-│   └── utils/                      # Shared utilities and global constants
-│       └── constants.dart          # Placeholder config values such as Zego API keys
-├── test/                           # Flutter test files
-│   └── widget_test.dart            # Default Flutter widget test scaffold
-├── pubspec.yaml                    # Package metadata, SDK constraints, and dependencies
-├── analysis_options.yaml           # Lint and analyzer rules
-└── README.md                       # Project overview and developer guidance
+├── android/                      # Native Android project and Gradle configuration
+├── ios/                          # Native iOS project and Xcode configuration
+├── lib/                          # Main Flutter application source
+│   ├── main.dart                 # App entry point and provider/root widget setup
+│   ├── models/                   # Domain models
+│   │   └── online_class.dart     # OnlineClass model, status enum, and copyWith logic
+│   ├── providers/                # State management layer
+│   │   └── class_provider.dart   # ChangeNotifier for class data and actions
+│   ├── screens/                  # Screen-level widgets
+│   │   └── home_screen.dart      # Main home screen scaffold with tabs
+│   ├── theme/                    # Shared styling and color definitions
+│   │   └── app_theme.dart        # App theme constants and subject color map
+│   └── utils/                    # Shared utilities and config placeholders
+│       └── constants.dart        # Zego-related placeholder configuration
+├── test/                         # Flutter widget and unit tests
+├── pubspec.yaml                  # App metadata and dependencies
+├── analysis_options.yaml         # Linting and analyzer rules
+└── README.md                     # Contributor-facing project documentation
 ```
 
-## Core Files and Responsibilities
+## Core Modules and Responsibilities
 
 ### `lib/main.dart`
 
-- Contains `main()` and `runApp()`.
-- Defines `MyApp`, which builds the root `MaterialApp`.
-- Configures app title, debugging banner, and a seeded theme.
-- Currently minimal: it does not yet connect a home screen, routing, or provider wiring.
+- Defines `main()` and starts the app with `runApp()`.
+- Creates a `ChangeNotifierProvider` with `ClassProvider`.
+- Builds the root `MaterialApp` and applies the app theme.
+- Points the app to `HomeScreen` as the initial route.
 
-### `lib/theme/app_theme.dart`
+### `lib/screens/home_screen.dart`
 
-- Centralizes app color constants used for branding and UI styling.
-- Defines core palette values: `primary`, `secondary`, `background`, `textPrimary`, `textSecondary`, and `accent`.
-- Includes `SubjectColors.colors`, a semantic map for subject-specific accent palettes.
-- Best used across screens and widgets to keep color usage consistent.
-
-### `lib/utils/constants.dart`
-
-- Provides a global configuration file for app-level values.
-- Defines `ZegoConfig` placeholders (`appID`, `appSign`) for future video conferencing integration.
-- Intended to hold API endpoints, feature flags, and service keys as the app grows.
-
-### `lib/models/online_class.dart`
-
-- Defines `OnlineClass`, the core data model for lessons and sessions.
-- Stores metadata such as title, instructor, subject, schedule, duration, and description.
-- Exposes computed state helpers: `isLive`, `isUpcoming`, and `isCompleted`.
-- Supports immutable updates using `copyWith()`.
-- Includes `ClassStatus` enum values: `scheduled`, `live`, `completed`, and `cancelled`.
+- Contains the main user interface entry screen.
+- Uses `TabController` to organize content into Live, Upcoming, and Completed sections.
+- Watches `ClassProvider` so the UI can react to class-state changes.
+- Currently acts as a scaffold for the home experience and is expected to grow into a richer screen.
 
 ### `lib/providers/class_provider.dart`
 
-- Implements a `ChangeNotifier` provider for online class data state.
-- Maintains an in-memory class list seeded by `_initClasses()`.
-- Exposes filtered views: `liveClasses`, `upComingClasses`, and `completedClasses`.
-- Supports actions: `onRefreshClasses()` and `onJoinClass()`.
-- Ready to be connected to the widget tree with `Provider` or another state management solution.
+- Implements the app’s main state container using `ChangeNotifier`.
+- Initializes a sample list of `OnlineClass` instances.
+- Exposes derived lists such as `liveClasses`, `upComingClasses`, and `completedClasses`.
+- Provides actions such as `onRefreshClasses()` and `onJoinClass()`.
+- This is the central place for class-related state logic.
 
-### `pubspec.yaml`
+### `lib/models/online_class.dart`
 
-- Declares the Dart SDK constraint and app metadata.
-- Lists package dependencies required by the source tree.
-- Includes both runtime dependencies and dev dependencies.
-- Enables `uses-material-design: true` for Material icon support.
+- Defines the core data model for a class or session.
+- Stores fields such as title, instructor, subject, schedule, duration, description, and participants.
+- Includes computed properties for current activity state:
+  - `isLive`
+  - `isUpcoming`
+  - `isCompleted`
+- Uses `copyWith()` for immutable-style updates.
+- Defines `ClassStatus` for lifecycle handling.
 
-## Native Platform Modules
+### `lib/theme/app_theme.dart`
 
-### `android/`
+- Centralizes shared color constants for the app.
+- Provides a consistent palette for brand styling and subject-based UI accents.
+- Should be used across screens and widgets to keep visual design consistent.
 
-- Contains Android platform-specific project files generated by Flutter.
-- Includes Gradle build files, manifest entries, and resource directories.
-- Required for building the Android app target.
+### `lib/utils/constants.dart`
 
-### `ios/`
+- Holds app-level configuration placeholders.
+- Contains `ZegoConfig` values for video conferencing integration.
+- Useful for future API keys, feature flags, endpoints, and environment-specific settings.
 
-- Contains the iOS project, workspace files, and platform resources.
-- Includes `Runner` source files, `Info.plist`, and interface assets.
-- Required for building the iOS app target.
+## How the Files Connect
 
-## How the Pieces Connect
+- `lib/main.dart` is the application bootstrap and wiring point.
+- `lib/main.dart` creates `ClassProvider` and passes it to the widget tree through `ChangeNotifierProvider`.
+- `lib/screens/home_screen.dart` consumes that provider using `context.watch<ClassProvider>()`.
+- `lib/providers/class_provider.dart` uses `OnlineClass` from `lib/models/online_class.dart` as the data contract.
+- The UI layer can rely on `app_theme.dart` for styling and `constants.dart` for configuration values.
+- Native platform folders remain separate and should only contain platform-specific logic when needed.
 
-- `lib/main.dart` is the app startup point and should become the connection hub for routing, providers, and top-level configuration.
-- `lib/theme/app_theme.dart` is the shared style source for app colors.
-- `lib/utils/constants.dart` is the shared config layer for third-party integrations.
-- `lib/models/online_class.dart` defines the app domain model for lesson scheduling.
-- `lib/providers/class_provider.dart` contains state and actions for the class list domain.
-- `pubspec.yaml` delivers the package dependencies and SDK constraints.
-- `android/` and `ios/` are platform-specific wrappers required by Flutter.
+## Current Development Shape
 
-## Recommended Extension Path
+The app is currently a structured starter project with a clear foundation for future expansion. The main areas that are already present are:
 
-For the next developer, the best growth path is:
+- a root app shell and theme setup
+- a provider-based state layer for class data
+- a domain model for online classes
+- a home screen scaffold for learning content
+- platform-ready Android and iOS project folders
 
-- Add `lib/screens/` for named pages and feature screens.
-- Add `lib/widgets/` for reusable UI components.
-- Add `lib/services/` for network, auth, persistence, and integration logic.
-- Add `lib/routes.dart` or a navigation module for route definitions.
-- Wire `class_provider.dart` into the root widget tree using a provider solution.
-- Replace `ZegoConfig` placeholders with real credentials when conferencing is enabled.
-- Apply `app_theme.dart` consistently across widgets and screens.
+## Suggested Extension Path
 
-## Notes for Developers
+For the next developer, the natural next steps are:
 
-- This repo is a scaffold: the current UI is minimal and most feature flow is not implemented yet.
-- The provider/model layer exists as a starting point for class scheduling and should be reused in future screens.
-- The video conferencing dependency is installed, but actual screen integration is not present yet.
-- Keep native platform code isolated to `android/` and `ios/` while building shared Flutter logic in `lib/`.
+- add dedicated feature screens under `lib/screens/`
+- create reusable widgets under `lib/widgets/`
+- move API or backend logic into `lib/services/`
+- expand routing and navigation once multiple screens exist
+- replace the current placeholder Zego configuration with real credentials when live sessions are implemented
+- connect additional screens and UI states to the existing provider layer
