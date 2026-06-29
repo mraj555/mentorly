@@ -29,15 +29,88 @@ class ClassCard extends StatelessWidget {
         borderRadius: .circular(16),
         child: Padding(
           padding: .all(16),
-          child: Row(
+          child: Column(
             children: [
+              Row(
+                children: [
+                  Container(
+                    padding: .all(12),
+                    decoration: BoxDecoration(
+                      color: _getSubjectColors().withValues(alpha: .1),
+                      borderRadius: .circular(12),
+                    ),
+                    child: Icon(Icons.book_outlined, color: _getSubjectColors(), size: 24),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: .start,
+                      children: [
+                        Text(
+                          classItem.title,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: .bold,
+                            color: Color(AppTheme.textPrimary),
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(Icons.person_outline, size: 14, color: Colors.grey[600]),
+                            SizedBox(width: 4),
+                            Text(
+                              classItem.instructor,
+                              style: TextStyle(fontSize: 14, color: Color(AppTheme.textSecondary)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (type == 'live') ...[
+                    SizedBox(height: 8),
+                    Container(
+                      padding: .symmetric(vertical: 6, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent,
+                        borderRadius: .circular(20),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.circle, color: Colors.white, size: 10),
+                          SizedBox(width: 6),
+                          Text(
+                            "LIVE",
+                            style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: .bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              SizedBox(height: 16),
               Container(
-                padding: .all(12),
-                decoration: BoxDecoration(
-                  color: _getSubjectColors().withValues(alpha: .1),
-                  borderRadius: .circular(12),
+                padding: .symmetric(vertical: 8, horizontal: 12),
+                decoration: BoxDecoration(color: Colors.grey[200], borderRadius: .circular(12)),
+                child: Row(
+                  children: [
+                    Icon(Icons.schedule, size: 16, color: Colors.grey[700]),
+                    SizedBox(width: 6),
+                    Text(
+                      type == 'completed'
+                          ? '${date_format.format(classItem.scheduledTime)} at ${time_format.format(classItem.scheduledTime.add(Duration(minutes: classItem.duration)))}'
+                          : '${time_format.format(classItem.scheduledTime)} - ${time_format.format(classItem.scheduledTime.add(Duration(minutes: classItem.duration)))}',
+                    ),
+                  ],
                 ),
-                child: Icon(Icons.book_outlined, color: _getSubjectColors(), size: 24),
+              ),
+
+              SizedBox(height: 12),
+              Text(
+                classItem.description,
+                style: TextStyle(fontSize: 14, color: Color(AppTheme.textSecondary)),
               ),
             ],
           ),
