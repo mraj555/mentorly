@@ -1,135 +1,204 @@
 # Mentorly
 
-Mentorly is a Flutter-based mobile app scaffold for an online-learning and class-scheduling experience. The current codebase is intentionally lightweight, but it already separates the app into clear layers for UI, state, domain models, theme, and platform integration.
+Mentorly is a Flutter-based mobile application for browsing and managing online learning classes. The codebase is intentionally structured as a lightweight starter app with a clear separation between presentation, state, domain models, shared styling, and platform-specific configuration.
 
-This README is written for the next developer who needs to understand how the project is structured and how the main files connect to each other.
+This document is written for the next developer who needs to understand the architecture quickly and know where the important pieces live.
+
+## Overview
+
+The app currently focuses on a single experience: a home screen that shows classes in three categories:
+
+- Live classes
+- Upcoming classes
+- Completed classes
+
+The user experience is driven by a Provider-based state layer, and the UI is composed from screen-level widgets and reusable list/card components.
 
 ## Tech Stack
 
-- Flutter SDK with Dart for cross-platform mobile application development
-- Material 3 and Flutter widgets for the app UI
-- Provider for state management and reactive UI updates
-- Google Fonts for typography and theme polish
-- Intl for date and time formatting utilities
-- Cupertino Icons for iOS-style icons
-- Zego prebuilt video conference UI and Zego Express Engine for future live-class integration
-- Flutter test and Flutter lints for validation and code quality
+Mentorly uses the following core technologies and packages:
 
-## Architecture Overview
+- Flutter + Dart for cross-platform mobile development
+- Material 3 UI components and Flutter widgets for the app shell and screens
+- Provider + ChangeNotifier for state management
+- Google Fonts for typography
+- Intl for date and time formatting
+- Cupertino Icons for iOS-style visual elements
+- Zego prebuilt video conference UI and Zego Express Engine for future live-class/video features
+- Flutter test and Flutter lints for validation and quality checks
 
-The project follows a simple layered structure that keeps the app easy to extend:
+## Architecture
 
-- UI layer: screens and widgets render the experience
-- State layer: providers expose data and actions to the UI
-- Domain layer: models describe the business objects used by the app
-- Shared support layer: theme and constants provide reusable definitions
-- Platform layer: Android and iOS folders host native build configuration
+The project follows a simple layered architecture that keeps responsibilities easy to understand:
+
+- Presentation layer: screens and widgets render the experience
+- State layer: providers expose app state and actions to the UI
+- Domain layer: models describe business objects such as classes and sessions
+- Shared support layer: theme and constants provide reusable styling and configuration
+- Platform layer: Android and iOS folders contain native build configuration
 
 ### Runtime Flow
 
-1. `lib/main.dart` boots the app and creates the root provider container.
-2. `HomeScreen` is mounted as the initial screen and listens to `ClassProvider`.
-3. `ClassProvider` seeds sample `OnlineClass` data and exposes filtered lists such as live, upcoming, and completed classes.
-4. `OnlineClass` holds the shape of each class and provides computed flags like `isLive`, `isUpcoming`, and `isCompleted`.
-5. Theme values and config placeholders are shared through `app_theme.dart` and `constants.dart`.
+1. The app starts in lib/main.dart.
+2. Main wires up a ChangeNotifierProvider with ClassProvider.
+3. HomeScreen reads the provider and renders the tabbed class experience.
+4. ClassProvider prepares sample OnlineClass data and exposes derived lists for live, upcoming, and completed sessions.
+5. The UI components consume that state and render cards and lists for each class category.
+
+### Architectural Pattern
+
+The current implementation uses a straightforward provider-driven architecture:
+
+- The provider owns the app state and business logic for classes.
+- The screen consumes that provider and reacts to updates.
+- The model defines the shape of each class object.
+- The widgets are responsible only for rendering and layout.
+
+This structure makes it easy to grow the app into a larger feature-based architecture later.
 
 ## Project Structure
 
 ```text
 mentorly/
-├── android/                      # Native Android project and Gradle configuration
-├── ios/                          # Native iOS project and Xcode configuration
-├── lib/                          # Main Flutter application source
-│   ├── main.dart                 # App entry point and provider/root widget setup
-│   ├── models/                   # Domain models
-│   │   └── online_class.dart     # OnlineClass model, status enum, and copyWith logic
-│   ├── providers/                # State management layer
-│   │   └── class_provider.dart   # ChangeNotifier for class data and actions
-│   ├── screens/                  # Screen-level widgets
-│   │   └── home_screen.dart      # Main home screen scaffold with tabs
-│   ├── theme/                    # Shared styling and color definitions
-│   │   └── app_theme.dart        # App theme constants and subject color map
-│   └── utils/                    # Shared utilities and config placeholders
-│       └── constants.dart        # Zego-related placeholder configuration
-├── test/                         # Flutter widget and unit tests
-├── pubspec.yaml                  # App metadata and dependencies
-├── analysis_options.yaml         # Linting and analyzer rules
-└── README.md                     # Contributor-facing project documentation
+├── android/                          # Native Android project and Gradle config
+├── ios/                              # Native iOS project and Xcode config
+├── lib/                              # Main Flutter source code
+│   ├── main.dart                     # App bootstrap and root provider setup
+│   ├── models/                       # Domain models
+│   │   └── online_class.dart         # OnlineClass model, computed status flags, and copyWith
+│   ├── providers/                    # State management layer
+│   │   └── class_provider.dart       # ChangeNotifier for class data and class actions
+│   ├── screens/                      # Screen-level UI components
+│   │   └── home_screen.dart          # Main home screen with tabs for live/upcoming/completed
+│   ├── theme/                        # Shared theme values
+│   │   └── app_theme.dart            # Brand colors and subject-based color mapping
+│   ├── utils/                        # Shared helpers and config placeholders
+│   │   └── constants.dart            # Zego configuration placeholders
+│   └── widgets/                      # Reusable presentational widgets
+│       ├── class_card.dart           # Individual class card UI
+│       └── class_listview.dart       # List container for a class category
+├── test/                             # Automated tests
+├── pubspec.yaml                      # App dependencies and package metadata
+├── analysis_options.yaml             # Analyzer and lint configuration
+└── README.md                         # Project documentation
 ```
 
-## Core Modules and Responsibilities
+## Key Files and Their Responsibilities
 
-### `lib/main.dart`
+### lib/main.dart
 
-- Defines `main()` and starts the app with `runApp()`.
-- Creates a `ChangeNotifierProvider` with `ClassProvider`.
-- Builds the root `MaterialApp` and applies the app theme.
-- Points the app to `HomeScreen` as the initial route.
+This is the application entry point.
 
-### `lib/screens/home_screen.dart`
+Responsibilities:
 
-- Contains the main user interface entry screen.
-- Uses `TabController` to organize content into Live, Upcoming, and Completed sections.
-- Watches `ClassProvider` so the UI can react to class-state changes.
-- Currently acts as a scaffold for the home experience and is expected to grow into a richer screen.
+- Starts the app with runApp()
+- Creates the root ChangeNotifierProvider
+- Configures the MaterialApp theme
+- Points the app to HomeScreen as the initial screen
 
-### `lib/providers/class_provider.dart`
+### lib/screens/home_screen.dart
 
-- Implements the app’s main state container using `ChangeNotifier`.
-- Initializes a sample list of `OnlineClass` instances.
-- Exposes derived lists such as `liveClasses`, `upComingClasses`, and `completedClasses`.
-- Provides actions such as `onRefreshClasses()` and `onJoinClass()`.
-- This is the central place for class-related state logic.
+This is the main screen for the current app experience.
 
-### `lib/models/online_class.dart`
+Responsibilities:
 
-- Defines the core data model for a class or session.
-- Stores fields such as title, instructor, subject, schedule, duration, description, and participants.
-- Includes computed properties for current activity state:
-  - `isLive`
-  - `isUpcoming`
-  - `isCompleted`
-- Uses `copyWith()` for immutable-style updates.
-- Defines `ClassStatus` for lifecycle handling.
+- Renders the app bar and tabbed interface
+- Displays three sections: Live, Upcoming, and Completed
+- Reads data from ClassProvider using context.watch
+- Passes the relevant class list to the list widget for each tab
 
-### `lib/theme/app_theme.dart`
+### lib/providers/class_provider.dart
 
-- Centralizes shared color constants for the app.
-- Provides a consistent palette for brand styling and subject-based UI accents.
-- Should be used across screens and widgets to keep visual design consistent.
+This is the central state container for the app.
 
-### `lib/utils/constants.dart`
+Responsibilities:
 
-- Holds app-level configuration placeholders.
-- Contains `ZegoConfig` values for video conferencing integration.
-- Useful for future API keys, feature flags, endpoints, and environment-specific settings.
+- Holds the list of OnlineClass objects
+- Seeds sample class data for the current UI
+- Exposes derived lists such as liveClasses, upComingClasses, and completedClasses
+- Provides actions such as onRefreshClasses() and onJoinClass()
+- Emits notifications when data changes so the UI updates
 
-## How the Files Connect
+### lib/models/online_class.dart
 
-- `lib/main.dart` is the application bootstrap and wiring point.
-- `lib/main.dart` creates `ClassProvider` and passes it to the widget tree through `ChangeNotifierProvider`.
-- `lib/screens/home_screen.dart` consumes that provider using `context.watch<ClassProvider>()`.
-- `lib/providers/class_provider.dart` uses `OnlineClass` from `lib/models/online_class.dart` as the data contract.
-- The UI layer can rely on `app_theme.dart` for styling and `constants.dart` for configuration values.
-- Native platform folders remain separate and should only contain platform-specific logic when needed.
+This file defines the core domain model.
 
-## Current Development Shape
+Responsibilities:
 
-The app is currently a structured starter project with a clear foundation for future expansion. The main areas that are already present are:
+- Represents a class session with fields such as title, instructor, subject, schedule, duration, and description
+- Calculates whether the class is currently live, upcoming, or completed
+- Supports immutable-style updates through copyWith()
+- Defines the ClassStatus enum used by the app
 
-- a root app shell and theme setup
-- a provider-based state layer for class data
-- a domain model for online classes
-- a home screen scaffold for learning content
-- platform-ready Android and iOS project folders
+### lib/widgets/class_card.dart
 
-## Suggested Extension Path
+This is the reusable card UI for a single class.
 
-For the next developer, the natural next steps are:
+Responsibilities:
 
-- add dedicated feature screens under `lib/screens/`
-- create reusable widgets under `lib/widgets/`
-- move API or backend logic into `lib/services/`
-- expand routing and navigation once multiple screens exist
-- replace the current placeholder Zego configuration with real credentials when live sessions are implemented
-- connect additional screens and UI states to the existing provider layer
+- Renders the visual summary of a class item
+- Applies subject-based color styling
+- Prepares the UI for future interactions such as navigation to class details
+
+### lib/widgets/class_listview.dart
+
+This is a reusable list container for a class category.
+
+Responsibilities:
+
+- Displays either a list of classes or an empty state message
+- Accepts a list of OnlineClass values and a type label
+- Delegates each item to ClassCard
+
+### lib/theme/app_theme.dart
+
+This file centralizes the shared visual design values.
+
+Responsibilities:
+
+- Stores brand colors and app-level palette values
+- Supplies subject-specific color mappings for cards and icons
+- Keeps styling consistent across the app
+
+### lib/utils/constants.dart
+
+This file contains configuration placeholders for future integrations.
+
+Responsibilities:
+
+- Stores Zego configuration values for video/conference features
+- Acts as a central place for future API keys, environment values, or feature flags
+
+## How the Main Files Connect
+
+The app is wired together in a simple way:
+
+- lib/main.dart is the bootstrap point.
+- lib/main.dart creates ClassProvider and injects it into the widget tree.
+- HomeScreen reads the provider and builds the visible UI.
+- ClassProvider supplies the data model instances from lib/models/online_class.dart.
+- The screen renders those models through the widget layer in lib/widgets/.
+- Shared styling comes from lib/theme/app_theme.dart, while configuration values come from lib/utils/constants.dart.
+
+## Current Data Flow
+
+A typical user interaction follows this path:
+
+1. HomeScreen asks the provider for the current class lists.
+2. ClassProvider returns the filtered data based on class timing and status.
+3. ClassListview renders the appropriate list for each tab.
+4. Each item is displayed through ClassCard.
+5. If the class list is refreshed, the provider updates state and the UI re-renders.
+
+## Extension Points
+
+The current structure is intentionally simple, but it is already prepared for future growth.
+
+Good next areas to extend:
+
+- Add dedicated feature screens under lib/screens/
+- Introduce a services layer for API or backend integration
+- Create more reusable widgets for richer class details and navigation
+- Add routing for class detail screens and user flows
+- Replace placeholder Zego constants with real production configuration when live sessions are implemented
+- Expand the provider layer as the app evolves into a larger multi-feature product

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mentorly/providers/class_provider.dart';
+import 'package:mentorly/widgets/class_listview.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -48,6 +49,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             Tab(text: 'Live'),
             Tab(text: 'Upcoming'),
             Tab(text: 'Completed'),
+          ],
+        ),
+      ),
+      body: RefreshIndicator(
+        onRefresh: classProvider.onRefreshClasses,
+        child: TabBarView(
+          controller: _controller,
+          children: [
+            ClassListview(classes: classProvider.liveClasses, type: 'live'),
+            ClassListview(classes: classProvider.upComingClasses, type: 'upcoming'),
+            ClassListview(classes: classProvider.completedClasses, type: 'completed'),
           ],
         ),
       ),
